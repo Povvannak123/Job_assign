@@ -3,6 +3,19 @@ set -e
 
 echo "=== Job Assign Management System — Backend ==="
 
+# ── Validate APP_KEY ──────────────────────────────────────────────────────────
+# Render's generateValue:true produces a hex/random string, not Laravel's
+# required "base64:<32-bytes>" format. Auto-fix it if needed so the app
+# doesn't return 500 on every request due to an invalid encryption cipher.
+if [ -z "$APP_KEY" ] || ! echo "$APP_KEY" | grep -qE "^base64:.{40,}"; then
+    echo "WARNING: APP_KEY is missing or not in Laravel format (base64:...)."
+    GENERATED_KEY="base64:$(head -c 32 /dev/urandom | base64 | tr -d '\n=')"
+    export APP_KEY="$GENERATED_KEY"
+    echo "  ✔  Generated a temporary APP_KEY for this boot."
+    echo "  ➜  Set this permanently on your hosting platform:"
+    echo "     APP_KEY=$APP_KEY"
+fi
+
 # Wait for PostgreSQL to be ready (max 90 seconds)
 echo "Waiting for PostgreSQL at ${DB_HOST}:${DB_PORT}..."
 RETRIES=30

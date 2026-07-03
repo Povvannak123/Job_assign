@@ -1,13 +1,23 @@
 # Render Blueprint — Job Assign Management System
 # Docs: https://render.com/docs/blueprint-spec
 #
-# After the first deploy, update the two placeholder env vars below:
-#   APP_URL           → https://<your-backend-name>.onrender.com
-#   FRONTEND_URL      → https://<your-frontend-name>.onrender.com
-#   SANCTUM_STATEFUL_DOMAINS → <your-frontend-name>.onrender.com
-#   VITE_API_URL      → https://<your-backend-name>.onrender.com/api/v1
+# ══════════════════════════════════════════════════════════════════
+# REQUIRED SETUP AFTER FIRST DEPLOY
+# ══════════════════════════════════════════════════════════════════
+# In Render Dashboard → each service → Environment, set:
 #
-# Then trigger a manual re-deploy for both services.
+#  Backend (job-assign-api):
+#    APP_KEY      → run: php artisan key:generate --show
+#                   (looks like: base64:xxxxxx...=)
+#    APP_URL      → https://<job-assign-api>.onrender.com
+#    FRONTEND_URL → https://<job-assign-app>.onrender.com
+#    SANCTUM_STATEFUL_DOMAINS → <job-assign-app>.onrender.com
+#
+#  Frontend (job-assign-app):
+#    VITE_API_URL → https://<job-assign-api>.onrender.com/api/v1
+#
+# After setting these vars, trigger a manual re-deploy for both services.
+# ══════════════════════════════════════════════════════════════════
 
 databases:
   - name: job-assign-db
@@ -30,10 +40,15 @@ services:
         value: "Job Assign Management System"
       - key: APP_ENV
         value: production
+      # Generate with: docker compose exec backend php artisan key:generate --show
+      # Then paste the output (base64:xxx...) into Render's dashboard for APP_KEY.
+      # Render's generateValue:true does NOT produce a Laravel-compatible key.
       - key: APP_KEY
-        generateValue: true
+        sync: false
       - key: APP_DEBUG
         value: "false"
+      - key: APP_TIMEZONE
+        value: Asia/Phnom_Penh
 
       # Set this after your first deploy to the actual backend URL
       - key: APP_URL
