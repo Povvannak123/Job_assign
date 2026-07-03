@@ -35,8 +35,11 @@ COPY . .
 # Complete composer install
 RUN composer dump-autoload --optimize
 
-# Set permissions
-RUN chown -R www-data:www-data storage bootstrap/cache \
+# Ensure all required Laravel directories exist, then set permissions
+RUN mkdir -p storage/framework/{sessions,views,cache/data,testing} \
+        storage/logs \
+        bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
 # Configure Apache virtual host

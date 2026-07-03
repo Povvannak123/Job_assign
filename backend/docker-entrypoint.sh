@@ -28,6 +28,11 @@ until php -r "
 done
 echo "PostgreSQL is ready (or timed out — continuing)."
 
+# Re-apply permissions at runtime (Docker volume mounts can reset ownership)
+mkdir -p storage/framework/{sessions,views,cache/data,testing} storage/logs bootstrap/cache
+chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+
 # Clear config cache to pick up environment variables
 php artisan config:clear 2>/dev/null || true
 
