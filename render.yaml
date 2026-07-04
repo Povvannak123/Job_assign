@@ -103,8 +103,10 @@ services:
     httpPort: 80
     plan: free
     envVars:
-      # Render passes env vars as Docker build args automatically.
-      # Set this to your backend URL before deploying:
-      # https://<your-backend-name>.onrender.com/api/v1
+      # ⚠ REQUIRED: Set this to your actual backend URL in Render's dashboard.
+      # Go to: job-assign-app → Environment → VITE_API_URL
+      # Value:  https://job-assign-backend.onrender.com/api/v1
+      # Then click "Save Changes" and trigger a Manual Deploy.
+      # This variable is BAKED into the Docker image at build time.
       - key: VITE_API_URL
-        sync: false
+        value: https://job-assign-backend.onrender.com/api/v1
