@@ -40,11 +40,10 @@ services:
         value: "Job Assign Management System"
       - key: APP_ENV
         value: production
-      # Generate with: docker compose exec backend php artisan key:generate --show
-      # Then paste the output (base64:xxx...) into Render's dashboard for APP_KEY.
-      # Render's generateValue:true does NOT produce a Laravel-compatible key.
+      # Laravel encryption key — generated with: php artisan key:generate --show
+      # This value is safe to store here; rotate it if you suspect a breach.
       - key: APP_KEY
-        sync: false
+        value: base64:2EseCFonH53Sxy+rkvnN4MaRjfsfp6eXAkKOkyAolpY=
       - key: APP_DEBUG
         value: "false"
       - key: APP_TIMEZONE
