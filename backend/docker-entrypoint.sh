@@ -16,21 +16,43 @@ if [ -z "$APP_KEY" ] || ! echo "$APP_KEY" | grep -qE "^base64:.{40,}"; then
     echo "     APP_KEY=$APP_KEY"
 fi
 
+# ── Resolve database connection from DATABASE_URL if individual vars are missing ──
+# Render wires the database via DATABASE_URL (connectionString). The individual
+# DB_HOST / DB_PORT / etc. vars are only set when fromDatabase is used in the
+# Blueprint. If they are absent, parse them from DATABASE_URL so the wait
+# loop below works correctly.
+if [ -z "$DB_HOST" ] && [ -n "$DATABASE_URL" ]; then
+    # postgres://user:pass@host:port/dbname  (or postgresql://)
+    _DSN="${DATABASE_URL#postgres*://}"          # strip scheme
+    DB_USERNAME="${_DSN%%:*}"                    # everything before first ':'
+    _DSN="${_DSN#*:}"                            # strip username
+    DB_PASSWORD="${_DSN%%@*}"                    # everything before '@'
+    _DSN="${_DSN#*@}"                            # strip password@
+    DB_HOST="${_DSN%%[:\/]*}"                    # host (stop at ':' or '/')
+    _DSN="${_DSN#*:}"                            # strip host:
+    DB_PORT="${_DSN%%\/*}"                       # port (stop at '/')
+    DB_DATABASE="${_DSN#*/}"                     # dbname (after '/')
+    DB_DATABASE="${DB_DATABASE%%\?*}"            # strip query string
+    echo "  Parsed DATABASE_URL → host=${DB_HOST} port=${DB_PORT} db=${DB_DATABASE}"
+fi
+
 # Wait for PostgreSQL to be ready (max 90 seconds)
-echo "Waiting for PostgreSQL at ${DB_HOST}:${DB_PORT}..."
+echo "Waiting for PostgreSQL at ${DB_HOST}:${DB_PORT:-5432}..."
 RETRIES=30
 until php -r "
+    \$host = '${DB_HOST}';
+    \$port = '${DB_PORT:-5432}';
+    \$db   = '${DB_DATABASE}';
+    \$user = '${DB_USERNAME}';
+    \$pass = '${DB_PASSWORD}';
+    if (empty(\$host)) { echo 'skip'; exit(0); }
     try {
-        new PDO(
-            'pgsql:host=${DB_HOST};port=${DB_PORT};dbname=${DB_DATABASE}',
-            '${DB_USERNAME}',
-            '${DB_PASSWORD}'
-        );
+        new PDO(\"pgsql:host=\$host;port=\$port;dbname=\$db\", \$user, \$pass);
         echo 'ok';
     } catch (Exception \$e) {
         exit(1);
     }
-" 2>/dev/null | grep -q "ok"; do
+" 2>/dev/null | grep -qE "ok|skip"; do
     RETRIES=$((RETRIES - 1))
     if [ "$RETRIES" -le 0 ]; then
         echo "ERROR: PostgreSQL did not become ready in time. Starting anyway..."

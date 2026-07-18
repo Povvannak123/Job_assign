@@ -56,6 +56,13 @@ services:
       # PostgreSQL — automatically wired from the database above
       - key: DB_CONNECTION
         value: pgsql
+      # DATABASE_URL is the primary connection string used by Laravel.
+      # The individual vars below are fallbacks; the entrypoint also
+      # parses DATABASE_URL directly for the PostgreSQL readiness check.
+      - key: DATABASE_URL
+        fromDatabase:
+          name: job-assign-db
+          property: connectionString
       - key: DB_HOST
         fromDatabase:
           name: job-assign-db
