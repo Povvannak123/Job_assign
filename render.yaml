@@ -49,6 +49,14 @@ services:
       - key: APP_TIMEZONE
         value: Asia/Phnom_Penh
 
+      # ── Initial admin login credentials ──────────────────────────────────────
+      # Change these to your real admin staff ID and password.
+      # After first deploy you can update them from the admin panel instead.
+      - key: ADMIN_STAFF_ID
+        value: "00001"
+      - key: ADMIN_PASSWORD
+        sync: false
+
       # Set this after your first deploy to the actual backend URL
       - key: APP_URL
         sync: false
