@@ -92,6 +92,10 @@ services:
           name: job-assign-db
           property: password
 
+      # SSL mode for PostgreSQL — use "require" for Neon or other cloud DBs
+      - key: DB_SSLMODE
+        value: require
+
       - key: CACHE_STORE
         value: file
       - key: SESSION_DRIVER
