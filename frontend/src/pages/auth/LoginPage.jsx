@@ -87,7 +87,7 @@ const LoginPage = () => {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="e.g. 00001"
+                placeholder="e.g. 03593"
                 required
                 autoComplete="username"
                 className="w-full px-4 py-2.5 bg-white/10 border border-white/25 rounded-lg text-white placeholder-red-300/60 focus:outline-none focus:ring-2 focus:ring-white/60 focus:border-transparent text-sm"

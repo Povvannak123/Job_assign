@@ -81,8 +81,12 @@ php artisan cache:clear 2>/dev/null || true
 # Create the public storage symlink so uploaded files are web-accessible
 php artisan storage:link --force 2>/dev/null || true
 
-# Seed only if no users exist
-echo "Checking if database needs seeding..."
+# Always sync default users (updateOrCreate — safe to run every boot)
+echo "Syncing default user accounts..."
+php artisan db:seed --class=Database\\Seeders\\UserSeeder --force
+
+# Seed sample tasks only on a fresh database
+echo "Checking if database needs task seeding..."
 USER_COUNT=$(php -r "
 require __DIR__.'/vendor/autoload.php';
 \$app = require_once __DIR__.'/bootstrap/app.php';
@@ -91,11 +95,19 @@ require __DIR__.'/vendor/autoload.php';
 echo App\Models\User::count();
 " 2>/dev/null || echo "0")
 
-if [ "$USER_COUNT" = "0" ]; then
-    echo "Seeding database..."
-    php artisan db:seed --force
+TASK_COUNT=$(php -r "
+require __DIR__.'/vendor/autoload.php';
+\$app = require_once __DIR__.'/bootstrap/app.php';
+\$kernel = \$app->make(Illuminate\Contracts\Console\Kernel::class);
+\$kernel->bootstrap();
+echo App\Models\Task::count();
+" 2>/dev/null || echo "0")
+
+if [ "$TASK_COUNT" = "0" ]; then
+    echo "Seeding sample tasks..."
+    php artisan db:seed --class=Database\\Seeders\\TaskSeeder --force
 else
-    echo "Database already seeded (${USER_COUNT} users found) — skipping."
+    echo "Tasks already seeded (${TASK_COUNT} found) — skipping."
 fi
 
 # Set up Laravel scheduler cron (runs every minute, artisan handles the schedule)

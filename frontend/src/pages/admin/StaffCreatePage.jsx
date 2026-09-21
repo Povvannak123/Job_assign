@@ -145,8 +145,14 @@ const StaffCreatePage = () => {
     const { name, value } = e.target
     setForm((f) => {
       const updated = { ...f, [name]: value }
-      if (name === 'staff_id' && !usernameManualRef.current) {
-        updated.username = value.trim()
+      if (name === 'staff_id') {
+        const id = value.trim()
+        if (!usernameManualRef.current) {
+          updated.username = id
+        }
+        // Default password = staff ID (same as login rule)
+        updated.password = id
+        updated.confirm_password = id
       }
       return updated
     })
@@ -183,7 +189,7 @@ const StaffCreatePage = () => {
     if (!form.phone_number.trim()) errs.phone_number = 'Phone number is required.'
     if (!form.username.trim()) errs.username = 'Username is required.'
     if (!form.password) errs.password = 'Password is required.'
-    else if (form.password.length < 6) errs.password = 'Password must be at least 6 characters.'
+    else if (form.password.length < 4) errs.password = 'Password must be at least 4 characters.'
     if (form.password !== form.confirm_password)
       errs.confirm_password = 'Passwords do not match.'
     return errs

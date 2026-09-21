@@ -17,14 +17,22 @@ class AuthController extends Controller
 
         $input = trim($request->username);
 
-        // Try staff_id first (exact or zero-padded match)
-        $user = User::where('staff_id', $input)
-            ->orWhere('staff_id', ltrim($input, '0') ?: '0')
-            ->first();
+        // Match staff_id with or without leading zeros (e.g. 03593 ↔ 3593)
+        $user = User::where(function ($q) use ($input) {
+            $q->where('staff_id', $input);
+
+            if (ctype_digit($input)) {
+                $unpadded = ltrim($input, '0') ?: '0';
+                $padded5  = str_pad($unpadded, 5, '0', STR_PAD_LEFT);
+
+                $q->orWhere('staff_id', $unpadded)
+                  ->orWhere('staff_id', $padded5);
+            }
+        })->first();
 
         // Fall back to database id for backward compatibility
-        if (!$user) {
-            $userId = (int) $input;
+        if (!$user && ctype_digit($input)) {
+            $userId = (int) ltrim($input, '0');
             $user = $userId > 0 ? User::find($userId) : null;
         }
 

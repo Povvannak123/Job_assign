@@ -56,7 +56,7 @@ class UserController extends Controller
             'staff_id'     => 'nullable|string|max:20|unique:users,staff_id',
             'name'         => 'required|string|max:50',
             'email'        => 'required|email|unique:users,email',
-            'password'     => 'required|string|min:6',
+            'password'     => 'required|string|min:4',
             'role'         => 'nullable|in:admin,staff',
             'position'     => 'nullable|string|max:50',
             'phone_number' => 'nullable|string|max:20',
@@ -148,7 +148,7 @@ class UserController extends Controller
             'staff_id'     => 'nullable|string|max:20|unique:users,staff_id,' . $user->id,
             'name'         => 'sometimes|required|string|max:50',
             'email'        => 'sometimes|required|email|unique:users,email,' . $user->id,
-            'password'     => 'nullable|string|min:6',
+            'password'     => 'nullable|string|min:4',
             'role'         => 'nullable|in:admin,staff',
             'is_active'    => ['sometimes', 'nullable', function ($attribute, $value, $fail) {
                 $accepted = [true, false, 1, 0, '1', '0', 'true', 'false', 'on', 'off', 'yes', 'no'];
